@@ -1,4 +1,4 @@
-// script.js atualizado com validações, contadores e exportação completa
+// script.js atualizado com contagem precisa de pendentes e erros ao carregar
 
 const statusData = [];
 let countEnviados = 0;
@@ -22,7 +22,9 @@ csvInput.addEventListener('change', e => {
     statusData.length = 0;
     resetCounters();
 
-    lines.slice(1).forEach(line => {
+    const dataLines = lines.slice(1).filter(line => line.trim());
+
+    dataLines.forEach(line => {
       const [nome, telefone, pedido] = line.split(',').map(x => x.trim());
       const validTel = /^[0-9]{10,15}$/.test(telefone);
 
@@ -82,6 +84,10 @@ function renderItem(nome, telefone, pedido, mensagem, link, status, motivo = '')
       countEnviados++;
       countPendentes--;
       updateVisualCounters();
+
+      // Atualiza o status no array para exportação correta
+      const found = statusData.find(d => d.telefone === telefone && d.pedido === pedido);
+      if (found) found.status = 'enviado';
     });
 
     const copyBtn = document.createElement('button');
