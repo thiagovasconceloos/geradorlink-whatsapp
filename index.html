@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Gerador de Links WhatsApp</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1>Gerador de Links de WhatsApp com CSV</h1>
   <p>Formato esperado do CSV: <code>nome,telefone,pedido</code></p>
 
   <label for="messageTemplate">Mensagem personalizada:</label>
-  <textarea id="messageTemplate" rows="3" placeholder="Ex: Olá {{nome}}, seu pedido nº {{pedido}} está pronto."></textarea>
+  <textarea
+    id="messageTemplate"
+    rows="3"
+    placeholder="Ex: Olá {{nome}}, seu pedido nº {{pedido}} está pronto."
+  ></textarea>
 
   <label for="csvFile">Selecione seu arquivo CSV:</label>
   <input type="file" id="csvFile" accept=".csv" />
@@ -21,7 +25,7 @@
 
   <button id="exportStatus">Exportar todos os status</button>
 
-  <div id="summary" style="margin-top: 30px; padding: 20px; background: #f0f0f0; border-radius: 10px;">
+  <div id="summary" class="summary">
     <h2>Resumo Final</h2>
     <ul>
       <li><strong>✅ Enviados:</strong> <span id="count-enviados">0</span></li>
