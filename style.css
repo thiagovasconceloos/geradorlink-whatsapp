@@ -63,3 +63,15 @@ body {
     flex: 1;
   }
   
+  .link-erro {
+    background: #ffe6e6;
+    border: 1px solid #e74c3c;
+    color: #c0392b;
+    box-shadow: none;
+  }
+  .link-erro i {
+    color: #c0392b;
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+  }
+  
