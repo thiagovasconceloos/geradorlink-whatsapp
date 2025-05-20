@@ -17,15 +17,18 @@
   <label for="csvFile">Selecione seu arquivo CSV:</label>
   <input type="file" id="csvFile" accept=".csv" />
 
-  <div id="counters">
-    <p><strong>📤 Enviados:</strong> <span id="count-enviados">0</span></p>
-    <p><strong>🕒 Pendentes:</strong> <span id="count-pendentes">0</span></p>
-    <p><strong>⚠️ Com erro:</strong> <span id="count-erros">0</span></p>
-  </div>
-
   <div id="output"></div>
 
   <button id="exportStatus">Exportar todos os status</button>
+
+  <div id="summary" style="margin-top: 30px; padding: 20px; background: #f0f0f0; border-radius: 10px;">
+    <h2>Resumo Final</h2>
+    <ul>
+      <li><strong>✅ Enviados:</strong> <span id="count-enviados">0</span></li>
+      <li><strong>🕒 Pendentes:</strong> <span id="count-pendentes">0</span></li>
+      <li><strong>❌ Com erro:</strong> <span id="count-erros">0</span></li>
+    </ul>
+  </div>
 
   <script src="script.js"></script>
 </body>
