@@ -8,31 +8,34 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Gerador de Links de WhatsApp com CSV</h1>
-  <p>Formato esperado do CSV: <code>nome,telefone,pedido</code></p>
+  <main style="max-width: 600px; margin: 0 auto; padding: 1rem;">
+    <h1>Gerador de Links de WhatsApp com CSV</h1>
+    <p>Formato esperado do CSV: <code>nome,telefone,pedido</code></p>
 
-  <label for="messageTemplate">Mensagem personalizada:</label>
-  <textarea
-    id="messageTemplate"
-    rows="3"
-    placeholder="Ex: Olá {{nome}}, seu pedido nº {{pedido}} está pronto."
-  ></textarea>
+    <label for="messageTemplate">Mensagem personalizada:</label>
+    <textarea
+      id="messageTemplate"
+      rows="3"
+      placeholder="Ex: Olá {{nome}}, seu pedido nº {{pedido}} está pronto."
+    ></textarea>
 
-  <label for="csvFile">Selecione seu arquivo CSV:</label>
-  <input type="file" id="csvFile" accept=".csv" />
+    <label for="csvFile">Selecione seu arquivo CSV:</label>
+    <input type="file" id="csvFile" accept=".csv" />
 
-  <div id="output"></div>
+    <div
+      style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: flex-start; flex-wrap: wrap;"
+    >
+      <button id="exportStatus" type="button">Exportar todos os status</button>
+    </div>
 
-  <button id="exportStatus">Exportar todos os status</button>
+    <div id="output"></div>
 
-  <div id="summary" class="summary">
-    <h2>Resumo Final</h2>
-    <ul>
-      <li><strong>✅ Enviados:</strong> <span id="count-enviados">0</span></li>
-      <li><strong>🕒 Pendentes:</strong> <span id="count-pendentes">0</span></li>
-      <li><strong>❌ Com erro:</strong> <span id="count-erros">0</span></li>
+    <ul class="summary" aria-live="polite" aria-atomic="true">
+      <li><span>✅ Enviados:</span> <span id="count-enviados">0</span></li>
+      <li><span>🕒 Pendentes:</span> <span id="count-pendentes">0</span></li>
+      <li><span>❌ Com erro:</span> <span id="count-erros">0</span></li>
     </ul>
-  </div>
+  </main>
 
   <script src="script.js"></script>
 </body>
