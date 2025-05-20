@@ -1,4 +1,7 @@
 const statusData = [];
+let countEnviados = 0;
+let countPendentes = 0;
+let countErros = 0;
 
 document.getElementById('csvFile').addEventListener('change', function (e) {
   const file = e.target.files[0];
@@ -11,23 +14,23 @@ document.getElementById('csvFile').addEventListener('change', function (e) {
     const output = document.getElementById('output');
     output.innerHTML = '';
     statusData.length = 0;
+    resetCounters();
 
-    const template = document.getElementById('messageTemplate').value.trim() || 'Olá {{nome}}, seu pedido nº {{pedido}} está pronto para retirada.';
+    const template = document.getElementById('messageTemplate').value.trim() || 'Olá {{nome}}, seu pedido nº {{pedido}} está pronto.';
 
     lines.slice(1).forEach(line => {
       const [nome, telefone, pedido] = line.split(',').map(v => v.trim());
-      
-      // Validação básica
-      if (!nome || !telefone || !pedido) {
-        updateStatus(nome, telefone, pedido, 'erro', 'Dados incompletos');
-        appendErrorItem(output, nome, telefone, pedido, 'Dados incompletos');
-        return;
-      }
+      let status = '';
+      let motivo = '';
 
-      if (!/^\d{10,15}$/.test(telefone)) {
-        updateStatus(nome, telefone, pedido, 'erro', 'Telefone inválido');
-        appendErrorItem(output, nome, telefone, pedido, 'Telefone inválido');
-        return;
+      if (!nome || !telefone || !pedido) {
+        status = 'erro';
+        motivo = 'Dados incompletos';
+      } else if (!/^[0-9]{10,15}$/.test(telefone)) {
+        status = 'erro';
+        motivo = 'Telefone inválido';
+      } else {
+        status = 'pendente';
       }
 
       const mensagem = template
@@ -38,56 +41,78 @@ document.getElementById('csvFile').addEventListener('change', function (e) {
       const encodedMsg = encodeURIComponent(mensagem);
       const link = `https://wa.me/${telefone}?text=${encodedMsg}`;
 
-      const wrapper = document.createElement('div');
-      wrapper.className = 'link-item link-pending';
-
-      const icon = document.createElement('i');
-      icon.className = 'fas fa-phone';
-
-      const a = document.createElement('a');
-      a.href = link;
-      a.target = '_blank';
-      a.textContent = `Enviar para ${nome} (${telefone})`;
-      a.addEventListener('click', () => {
-        wrapper.classList.remove('link-pending');
-        wrapper.classList.add('link-sent');
-        updateStatus(nome, telefone, pedido, 'enviado');
-      });
-
-      const copyBtn = document.createElement('button');
-      copyBtn.textContent = '📋 Copiar';
-      copyBtn.style.marginLeft = '1rem';
-      copyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(mensagem);
-        copyBtn.textContent = '✅ Copiado!';
-        setTimeout(() => (copyBtn.textContent = '📋 Copiar'), 2000);
-      });
-
-      wrapper.appendChild(icon);
-      wrapper.appendChild(a);
-      wrapper.appendChild(copyBtn);
-      output.appendChild(wrapper);
-
-      updateStatus(nome, telefone, pedido, 'pendente');
+      updateStatus(nome, telefone, pedido, status, motivo);
+      renderItem(nome, telefone, pedido, mensagem, link, status, motivo);
     });
+
+    updateVisualCounters();
   };
+
   reader.readAsText(file);
 });
 
-function appendErrorItem(container, nome, telefone, pedido, motivo) {
+function renderItem(nome, telefone, pedido, mensagem, link, status, motivo = '') {
   const wrapper = document.createElement('div');
-  wrapper.className = 'link-item link-erro';
+  wrapper.className = `link-item link-${status}`;
 
   const icon = document.createElement('i');
-  icon.className = 'fas fa-exclamation-triangle';
+  icon.className = {
+    enviado: 'fas fa-check-circle',
+    pendente: 'fas fa-clock',
+    erro: 'fas fa-exclamation-triangle'
+  }[status];
 
-  const text = document.createElement('span');
-  text.textContent = `${nome || '[sem nome]'} (${telefone || '[sem telefone]'}): ${motivo}`;
+  const label = document.createElement('span');
+  label.textContent = `${nome} (${telefone})`;
 
-  wrapper.appendChild(icon);
-  wrapper.appendChild(text);
+  const statusText = document.createElement('span');
+  statusText.className = 'status-text';
+  statusText.textContent = {
+    enviado: '✅ Enviado',
+    pendente: '🕒 Pendente',
+    erro: `⚠️ Erro: ${motivo}`
+  }[status];
 
-  container.appendChild(wrapper);
+  const copyBtn = document.createElement('button');
+  copyBtn.textContent = '📋 Copiar';
+  copyBtn.className = 'copy-btn';
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(mensagem);
+    copyBtn.textContent = '✅ Copiado!';
+    setTimeout(() => (copyBtn.textContent = '📋 Copiar'), 2000);
+  });
+
+  if (status !== 'erro') {
+    const a = document.createElement('a');
+    a.href = link;
+    a.target = '_blank';
+    a.textContent = 'Abrir link';
+    a.addEventListener('click', () => {
+      if (wrapper.classList.contains('link-pendente')) {
+        wrapper.classList.remove('link-pendente');
+        wrapper.classList.add('link-enviado');
+        updateStatus(nome, telefone, pedido, 'enviado');
+        countPendentes--;
+        countEnviados++;
+        updateVisualCounters();
+        updateStatusLabel(wrapper, 'enviado');
+      }
+    });
+    wrapper.append(icon, label, statusText, copyBtn, a);
+  } else {
+    wrapper.append(icon, label, statusText);
+  }
+
+  document.getElementById('output').appendChild(wrapper);
+}
+
+function updateStatusLabel(wrapper, newStatus) {
+  const statusSpan = wrapper.querySelector('.status-text');
+  statusSpan.textContent = {
+    enviado: '✅ Enviado',
+    pendente: '🕒 Pendente',
+    erro: '⚠️ Erro'
+  }[newStatus];
 }
 
 function updateStatus(nome, telefone, pedido, status, motivo = '') {
@@ -98,6 +123,23 @@ function updateStatus(nome, telefone, pedido, status, motivo = '') {
   } else {
     statusData.push({ nome, telefone, pedido, status, motivo });
   }
+
+  if (status === 'erro') countErros++;
+  else if (status === 'pendente') countPendentes++;
+  else if (status === 'enviado') countEnviados++;
+}
+
+function resetCounters() {
+  countEnviados = 0;
+  countPendentes = 0;
+  countErros = 0;
+  updateVisualCounters();
+}
+
+function updateVisualCounters() {
+  document.getElementById('count-enviados').textContent = countEnviados;
+  document.getElementById('count-pendentes').textContent = countPendentes;
+  document.getElementById('count-erros').textContent = countErros;
 }
 
 function exportToCSV(filterFn, filename) {
@@ -124,10 +166,4 @@ function exportToCSV(filterFn, filename) {
 
 document.getElementById('exportStatus').addEventListener('click', () => {
   exportToCSV(() => true, 'todos_status.csv');
-});
-document.getElementById('exportEnviados').addEventListener('click', () => {
-  exportToCSV(d => d.status === 'enviado', 'enviados.csv');
-});
-document.getElementById('exportErros').addEventListener('click', () => {
-  exportToCSV(d => d.status === 'erro', 'erros.csv');
 });
