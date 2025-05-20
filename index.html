@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Links WhatsApp</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    h1 { font-size: 1.5rem; }
+    #output a { display: block; margin: 0.5rem 0; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h1>Gerador de Links de WhatsApp com CSV</h1>
+  <p>Formato esperado do CSV: <code>nome,telefone,pedido</code></p>
+  <input type="file" id="csvFile" accept=".csv" />
+  <div id="output"></div>
+
+  <script>
+    document.getElementById('csvFile').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const text = e.target.result;
+        const lines = text.split('\n');
+        const output = document.getElementById('output');
+        output.innerHTML = '';
+
+        lines.slice(1).forEach(line => {
+          const [nome, telefone, pedido] = line.split(',').map(v => v.trim());
+          if (!telefone || !pedido) return;
+
+          const mensagem = `Olá ${nome}, seu pedido nº ${pedido} está pronto para retirada.`;
+          const encodedMsg = encodeURIComponent(mensagem);
+          const link = `https://wa.me/${telefone}?text=${encodedMsg}`;
+
+          const a = document.createElement('a');
+          a.href = link;
+          a.target = '_blank';
+          a.textContent = `Enviar para ${nome} (${telefone})`;
+          output.appendChild(a);
+        });
+      };
+      reader.readAsText(file);
+    });
+  </script>
+</body>
+</html>
