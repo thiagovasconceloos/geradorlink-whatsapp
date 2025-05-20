@@ -51,8 +51,12 @@ csvInput.addEventListener('change', e => {
 });
 
 function updateStatus(nome, telefone, pedido, status, motivo = '') {
-  statusData.push({ nome, telefone, pedido, status, motivo });
+  let statusTexto = '';
+  if (status === 'erro') statusTexto = `Erro: ${motivo}`;
+  else if (status === 'pendente') statusTexto = 'Pendente';
+  else if (status === 'enviado') statusTexto = 'Enviado';
 
+  statusData.push({ nome, telefone, pedido, status: statusTexto });
   if (status === 'erro') countErros++;
   else if (status === 'pendente') countPendentes++;
   else if (status === 'enviado') countEnviados++;
@@ -60,7 +64,7 @@ function updateStatus(nome, telefone, pedido, status, motivo = '') {
 
 function renderItem(nome, telefone, pedido, mensagem, link, status, motivo = '') {
   const container = document.createElement('div');
-  container.className = `link-item link-${status}`;
+  container.className = `link-item link-${status === 'erro' ? 'erro' : status === 'pendente' ? 'pendente' : 'enviado'}`;
 
   const info = document.createElement('span');
   info.innerHTML = `<strong>${nome}</strong> (${telefone})`;
@@ -79,8 +83,8 @@ function renderItem(nome, telefone, pedido, mensagem, link, status, motivo = '')
 
     openBtn.addEventListener('click', () => {
       const found = statusData.find(d => d.telefone === telefone && d.pedido === pedido);
-      if (found && found.status !== 'enviado') {
-        found.status = 'enviado';
+      if (found && !found.status.startsWith('Enviado')) {
+        found.status = 'Enviado';
         countEnviados++;
         countPendentes--;
         updateVisualCounters();
@@ -121,8 +125,8 @@ function updateVisualCounters() {
 
 document.getElementById('exportStatus').addEventListener('click', () => {
   const csv = [
-    ['nome', 'telefone', 'pedido', 'status', 'motivo'],
-    ...statusData.map(d => [d.nome, d.telefone, d.pedido, d.status, d.motivo])
+    ['nome', 'telefone', 'pedido', 'status'],
+    ...statusData.map(d => [d.nome, d.telefone, d.pedido, d.status])
   ].map(row => row.join(',')).join('\n');
 
   const blob = new Blob([csv], { type: 'text/csv' });
