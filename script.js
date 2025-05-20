@@ -4,6 +4,7 @@ document.getElementById('csvFile').addEventListener('change', function (e) {
   const file = e.target.files[0];
   if (!file) return;
 
+  
   const reader = new FileReader();
   reader.onload = function (e) {
     const text = e.target.result;
