@@ -1,5 +1,3 @@
-// script.js atualizado com contagem precisa de pendentes e erros ao carregar
-
 const statusData = [];
 let countEnviados = 0;
 let countPendentes = 0;
@@ -22,6 +20,7 @@ csvInput.addEventListener('change', e => {
     statusData.length = 0;
     resetCounters();
 
+    // Remove cabeçalho e linhas vazias
     const dataLines = lines.slice(1).filter(line => line.trim());
 
     dataLines.forEach(line => {
@@ -77,17 +76,19 @@ function renderItem(nome, telefone, pedido, mensagem, link, status, motivo = '')
     openBtn.href = link;
     openBtn.target = '_blank';
     openBtn.textContent = 'Abrir link';
-    openBtn.addEventListener('click', () => {
-      container.classList.remove('link-pendente');
-      container.classList.add('link-enviado');
-      statusText.textContent = '✅ Enviado';
-      countEnviados++;
-      countPendentes--;
-      updateVisualCounters();
 
-      // Atualiza o status no array para exportação correta
+    openBtn.addEventListener('click', () => {
       const found = statusData.find(d => d.telefone === telefone && d.pedido === pedido);
-      if (found) found.status = 'enviado';
+      if (found && found.status !== 'enviado') {
+        found.status = 'enviado';
+        countEnviados++;
+        countPendentes--;
+        updateVisualCounters();
+
+        container.classList.remove('link-pendente');
+        container.classList.add('link-enviado');
+        statusText.textContent = '✅ Enviado';
+      }
     });
 
     const copyBtn = document.createElement('button');
